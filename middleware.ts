@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const accessToken = await getAccessToken();
 
-  // If there's no token AND the path matches a protected pattern, redirect
   if (!accessToken && isProtectedRoute(path)) {
     return NextResponse.redirect(new URL("/login", request.nextUrl));
   }

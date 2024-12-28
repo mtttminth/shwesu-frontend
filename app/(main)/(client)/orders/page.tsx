@@ -1,3 +1,5 @@
+// app/orders/page.tsx
+"use client";
 import {
   Typography,
   Box,
@@ -10,13 +12,23 @@ import {
   TableRow,
   Paper,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import { getOrders } from "@/lib/apis/order";
 import OrderDetail from "@/components/order/OrderDetail";
 import OrderHistoryPagination from "@/components/order/OrderHistoryPagination";
+import { useQuery } from "@tanstack/react-query";
 
-export default async function OrdersPage() {
-  const orders = await getOrders();
+export default function OrdersPage() {
+  const {
+    isLoading,
+    isError,
+    data: orders,
+    error,
+  } = useQuery({
+    queryKey: ["orders"],
+    queryFn: getOrders,
+  });
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -39,12 +51,30 @@ export default async function OrdersPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {orders ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : isError ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="h6" color="error">
+                        Error loading orders: {error?.message}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : orders?.data ? (
                   orders.data.map((order) => (
                     <OrderDetail key={order.id} order={order} />
                   ))
                 ) : (
-                  <Typography variant="h6">No orders available</Typography>
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="h6">No orders available</Typography>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -60,10 +90,12 @@ export default async function OrdersPage() {
             marginTop: "3rem",
           }}
         >
-          <OrderHistoryPagination
-            currentPage={orders.meta.current_page}
-            pageCount={orders.meta.last_page}
-          />
+          {orders?.meta && (
+            <OrderHistoryPagination
+              currentPage={orders.meta.current_page}
+              pageCount={orders.meta.last_page}
+            />
+          )}
         </Stack>
       </Box>
     </Box>

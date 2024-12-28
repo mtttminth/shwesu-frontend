@@ -1,6 +1,13 @@
-import axios, { AxiosError } from "axios";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { deleteAccessToken, getAccessToken } from "../auth/tokenService";
-import { redirect } from "next/navigation";
+
+export interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+  requiresAuth?: boolean;
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -11,11 +18,17 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    const accessToken = await getAccessToken();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    const customConfig = config as CustomAxiosRequestConfig;
+    if (customConfig.requiresAuth) {
+      const accessToken = await getAccessToken();
+      if (accessToken) {
+        customConfig.headers = {
+          ...customConfig.headers,
+          Authorization: `Bearer ${accessToken}`,
+        };
+      }
     }
-    return config;
+    return config as InternalAxiosRequestConfig;
   },
   (error: AxiosError) => {
     return Promise.reject(error);
@@ -27,12 +40,7 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
       deleteAccessToken();
-
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-
-      redirect("/login");
+      throw new Error("Unauthorized");
     }
     return Promise.reject(error);
   }

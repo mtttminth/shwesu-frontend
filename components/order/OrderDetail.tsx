@@ -15,7 +15,7 @@ import {
 import { FaArrowAltCircleDown, FaArrowAltCircleUp } from "react-icons/fa";
 import { Order } from "@/lib/types";
 import { formatPrice } from "@/lib/services";
-import api from "@/lib/apis/api";
+import api, { CustomAxiosRequestConfig } from "@/lib/apis/api";
 
 interface OrderDetailProps {
   order: Pick<
@@ -35,7 +35,9 @@ export default function OrderDetail({ order }: OrderDetailProps) {
     if (!open && !orderDetails) {
       setLoading(true);
       try {
-        const response = await api.get(`/orders/${order.id}`);
+        const response = await api.get(`/orders/${order.id}`, {
+          requiresAuth: true,
+        } as CustomAxiosRequestConfig);
         setOrderDetails(response.data.data);
       } catch (err: any) {
         console.error("Error fetching order details:", err);

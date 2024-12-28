@@ -6,7 +6,7 @@ import { TextField, Button, Box, Snackbar, Alert } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/apis/api"; // Import your api instance
+import api, { CustomAxiosRequestConfig } from "@/lib/apis/api"; // Import your api instance
 import { useRouter } from "next/navigation";
 
 const orderSchema = z.object({
@@ -31,8 +31,9 @@ const OrderForm: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const response = await api.post("orders/order", data);
-      console.log("Order placed successfully:", response.data);
+      await api.post("orders/order", data, {
+        requiresAuth: true,
+      } as CustomAxiosRequestConfig);
       setSnackbarOpen(true);
       setTimeout(() => {
         router.push("/orders");

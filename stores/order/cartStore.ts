@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Cart } from "@/lib/types";
-import api from "@/lib/apis/api";
+import api, { CustomAxiosRequestConfig } from "@/lib/apis/api";
 import { AxiosError } from "axios";
 
 interface CartState {
@@ -25,9 +25,14 @@ export const useCartStore = create<CartState>((set, get) => ({
   error: null,
   itemCount: 0,
   fetchCart: async () => {
+    if (typeof window === "undefined") {
+      return;
+    }
     set({ loading: true, error: null });
     try {
-      const response = await api.get<Cart>("/cart");
+      const response = await api.get<Cart>("/cart", {
+        requiresAuth: true,
+      } as CustomAxiosRequestConfig);
       set({ cart: response.data });
     } catch (error: any) {
       set({ error: error as AxiosError }); // Cast the error to AxiosError
@@ -36,13 +41,19 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
   fetchItemCount: async () => {
+    if (typeof window === "undefined") {
+      return;
+    }
     try {
       const response = await api.get<{ quantity: number }>(
-        "/cart/variants/count"
+        "/cart/variants/count",
+        {
+          requiresAuth: true,
+        } as CustomAxiosRequestConfig
       );
       set({ itemCount: response.data.quantity });
     } catch (error: any) {
-      console.error("Error fetching cart quantity:", error);
+      console.error("Error fetching cart quantity fetchItemCount:", error);
       // Optionally handle error, e.g., set itemCount to 0
     }
   },
@@ -60,12 +71,20 @@ export const useCartStore = create<CartState>((set, get) => ({
         : null,
     }));
     try {
-      const response = await api.post(`/cart/increase-quantity`, {
-        variant_id: variantId,
-      });
+      const response = await api.post(
+        `/cart/increase-quantity`,
+        {
+          variant_id: variantId,
+        },
+        {
+          requiresAuth: true,
+        } as CustomAxiosRequestConfig
+      );
       set({ cart: response.data });
-      get().fetchItemCount();
-      get().fetchCart();
+      if (typeof window !== "undefined") {
+        get().fetchItemCount();
+        get().fetchCart();
+      }
     } catch (error: any) {
       set({ error: error as AxiosError });
       // Revert on error if needed, or handle error more gracefully
@@ -97,12 +116,20 @@ export const useCartStore = create<CartState>((set, get) => ({
         : null,
     }));
     try {
-      const response = await api.post(`/cart/decrease-quantity`, {
-        variant_id: variantId,
-      });
+      const response = await api.post(
+        `/cart/decrease-quantity`,
+        {
+          variant_id: variantId,
+        },
+        {
+          requiresAuth: true,
+        } as CustomAxiosRequestConfig
+      );
       set({ cart: response.data });
-      get().fetchItemCount();
-      get().fetchCart();
+      if (typeof window !== "undefined") {
+        get().fetchItemCount();
+        get().fetchCart();
+      }
     } catch (error: any) {
       set({ error: error as AxiosError });
       // Revert on error if needed, or handle error more gracefully
@@ -122,20 +149,32 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
   removeVariant: async (variantId: number) => {
     try {
-      await api.post(`/cart/remove-variant`, {
-        variant_id: variantId,
-      });
-      get().fetchItemCount();
-      get().fetchCart();
+      await api.post(
+        `/cart/remove-variant`,
+        {
+          variant_id: variantId,
+        },
+        {
+          requiresAuth: true,
+        } as CustomAxiosRequestConfig
+      );
+      if (typeof window !== "undefined") {
+        get().fetchItemCount();
+        get().fetchCart();
+      }
     } catch (error: any) {
       set({ error: error as AxiosError });
     }
   },
   addToCart: async (payload: { variant_id: number; quantity: number }) => {
     try {
-      await api.post("/cart/add-or-update", payload);
-      get().fetchItemCount();
-      get().fetchCart();
+      await api.post("/cart/add-or-update", payload, {
+        requiresAuth: true,
+      } as CustomAxiosRequestConfig);
+      if (typeof window !== "undefined") {
+        get().fetchItemCount();
+        get().fetchCart();
+      }
     } catch (error: any) {
       set({ error: error as AxiosError });
       throw error; // Re-throw to allow component-level error handling if needed

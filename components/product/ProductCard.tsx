@@ -25,7 +25,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <img
             src={product.image_url || "/default-product.jpg"}
             alt="name"
-            className="h-auto max-w-full"
+            className="min-h-64 max-h-64 max-w-full"
           />
         </div>
         <div className="flex justify-between items-center">
@@ -49,96 +49,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </p>
         )}
       </Link>
-      {/* <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        <CardActionArea component={Link} href={`/products/${product.slug}`}>
-          <Box sx={{ position: "relative", paddingTop: "100%" }}>
-            <Image
-              src={product.image_url || "/default-product.jpg"}
-              alt={product.name}
-              fill
-              style={{ objectFit: "cover" }}
-              priority
-            />
-          </Box>
-          <CardContent
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              fontWeight="bold"
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "1rem", md: "1.2rem" },
-                wordBreak: "break-word",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: isDesktop ? undefined : 2,
-                WebkitBoxOrient: "vertical",
-                textAlign: "left",
-              }}
-            >
-              {product.name}
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isDesktop ? "row" : "column",
-                alignItems: isDesktop ? "center" : "flex-start",
-                gap: { xs: 0, sm: 1 },
-                fontSize: { xs: "0.7rem", sm: "0.8rem", md: "1rem" },
-                textAlign: "left",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  flexDirection: "row",
-                }}
-              >
-                <Typography variant="body2">Ks</Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight="bold"
-                  sx={{
-                    fontSize: { xs: "0.8rem", sm: "1rem", md: "1.2rem" },
-                  }}
-                >
-                  {formatPrice(product.discounted_price)}
-                </Typography>
-              </Box>
-              {product.unit_price !== product.discounted_price ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    textDecoration: "line-through",
-                    color: "rgba(0, 0, 0, 0.6)",
-                    fontSize: { xs: "0.8rem", sm: "1rem", md: "1.2rem" },
-                  }}
-                >
-                  {formatPrice(product.unit_price)}
-                </Typography>
-              ) : (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    visibility: "hidden",
-                    fontSize: { xs: "0.8rem", sm: "1rem", md: "1.2rem" },
-                  }}
-                >
-                  {formatPrice(product.unit_price)}
-                </Typography>
-              )}
-            </Box>
-          </CardContent>
-        </CardActionArea>
-      </Card> */}
     </Box>
   );
 };

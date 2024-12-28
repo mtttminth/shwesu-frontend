@@ -19,7 +19,7 @@ import SearchBar from "./SearchBar";
 import Logo from "@/components/Logo";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/order/cartStore";
-import { getAccessToken, deleteAccessToken } from "@/lib/auth/tokenService";
+import { deleteAccessToken, getAccessToken } from "@/lib/auth/tokenService";
 
 const Header: React.FC = () => {
   const [auth, setAuth] = useState(false);
@@ -30,23 +30,26 @@ const Header: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
+    if (typeof window !== "undefined") {
       const token = await getAccessToken();
-      setAuth(!!token);
-    };
-    checkAuthStatus();
+      return !!token;
+    }
+    return false;
   }, []);
 
   useEffect(() => {
-    const fetchCountIfTokenExists = async () => {
-      const token = await getAccessToken();
-      if (token) {
+    const checkAuth = async () => {
+      console.log("checking login");
+      const isLoggedIn = await checkAuthStatus();
+      if (isLoggedIn) {
+        console.log("logged in");
         fetchItemCount();
       }
+      setAuth(isLoggedIn);
     };
-    fetchCountIfTokenExists();
-  }, [fetchItemCount]);
+    checkAuth();
+  }, [fetchItemCount, checkAuthStatus]);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -62,9 +65,7 @@ const Header: React.FC = () => {
     handleClose();
     setSnackbarMessage("Logged out");
     setSnackbarOpen(true);
-    setTimeout(() => {
-      router.push("/");
-    }, 2000);
+    router.push("/");
   }, [router]);
 
   const handleSnackbarClose = (
@@ -191,9 +192,6 @@ const Header: React.FC = () => {
               <Box>
                 <Button variant="contained" component={Link} href="/login">
                   Login
-                </Button>
-                <Button component={Link} href="/register">
-                  Register
                 </Button>
               </Box>
             )}

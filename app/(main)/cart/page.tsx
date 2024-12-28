@@ -35,9 +35,11 @@ export default function CartPage() {
   } = useCartStore();
 
   useEffect(() => {
-    fetchCart();
+    if (typeof window !== "undefined") {
+      console.log("fetching cart in server");
+      fetchCart();
+    }
   }, [fetchCart]);
-
   const handleQuantityChange = useCallback(
     (variantId: number, newQuantity: number | null) => {
       if (newQuantity === null) {
@@ -99,7 +101,8 @@ export default function CartPage() {
               </Box>
             ) : error instanceof AxiosError && (error.response?.data as any) ? (
               <Alert severity="error">
-                Error fetching cart:{(error.response?.data as any)?.message}
+                Error fetching cart from cart.tsx:
+                {(error.response?.data as any)?.message}
               </Alert>
             ) : !cart || cart.variants.length === 0 ? (
               <Box

@@ -1,4 +1,4 @@
-import api from "../apis/api";
+import api, { CustomAxiosRequestConfig } from "../apis/api";
 import { Profile } from "../types";
 import { setAccessToken, deleteAccessToken } from "./tokenService";
 
@@ -36,7 +36,9 @@ export const loginUser = async (phone: string, password: string) => {
 
 export const signOut = async () => {
   try {
-    await api.post("/logout");
+    await api.post("/logout", {
+      requiresAuth: true,
+    } as CustomAxiosRequestConfig);
     deleteAccessToken();
   } catch (error) {
     console.error("Logout error:", error);
@@ -46,10 +48,12 @@ export const signOut = async () => {
 
 export async function getProfile(): Promise<Profile> {
   try {
-    const response = await api.get<{ data: Profile }>(`/profile`);
+    const response = await api.get<{ data: Profile }>(`/profile`, {
+      requiresAuth: true,
+    } as CustomAxiosRequestConfig);
     return response.data.data;
   } catch (error: unknown) {
-    console.error("Error fetching cart:", error);
+    console.error("Error fetching profile:", error);
     throw error;
   }
 }
@@ -62,14 +66,21 @@ export const profileUpdate = async (
   address: string | null | undefined
 ) => {
   try {
-    const response = await api.post("/profile/update", {
-      _method: "put",
-      name,
-      phone,
-      password: password ?? null,
-      password_confirmation: password_confirmation ?? null,
-      address,
-    });
+    const config: CustomAxiosRequestConfig = {
+      requiresAuth: true,
+    };
+    const response = await api.post(
+      "/profile/update",
+      {
+        _method: "put",
+        name,
+        phone,
+        password: password ?? null,
+        password_confirmation: password_confirmation ?? null,
+        address,
+      },
+      config
+    );
 
     if (
       (password !== null && password !== undefined) ||
